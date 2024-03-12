@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Brand {
+  id      String  @id @default(uuid())
+  name    String  @unique   @db.VarChar(255)
+  products Product[]
+}
+
+model Size {
+  id      String  @id @default(uuid())
+  name    String  @unique   @db.VarChar(255)
+  products Product[]
+}
+
+model Product {
+  id      String  @id @default(uuid())
+  name            String  @unique   @db.VarChar(255)
+  price           Float
+  imagePublicId   String      // Lưu public ID của hình ảnh trên Cloudinary
+  imageUrl        String      // Lưu đường dẫn URL của hình ảnh
+  description     String?
+  inventoryNumber Int?  // số lượng tồn kho
+  quantitySold    Int?  @default(0)// số lượng bán 
+  brandId         String?
+  brand           Brand?   @relation(fields: [brandId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sizeId          String?
+  size            Size?   @relation(fields: [sizeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  orders          OrderProduct[]
+}
+
+model Order {
+  id      String  @id @default(uuid())
+  totalPrice      Float
+  order_status    String
+  deliveryDate    DateTime  @db.Timestamp(6)  // ngày giao hàng
+  isPaid          Boolean   @default(false)   // đã thanh toán
+  isPaidAt        DateTime  @db.Timestamp(6)  // ngày thanh toán
+  created_at      DateTime  @default(now()) @db.Timestamp(6)
+  updated_at      DateTime  @default(now()) @db.Timestamp(6)
+  userId          String?
+  user            User?      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  products        OrderProduct[]
+}
+
+model OrderProduct {
+  quantity  Int
+  productId String
+  product   Product?   @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  orderId   String
+  order     Order?      @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@id([productId, orderId])
+}
+
+model User {
+  id      String  @id @default(uuid())
+  email String @unique
+  password  String
+  name  String?  @db.VarChar(255)
+  phone String?
+  address String?
+  avatar  String?
+  role Roles @default(USER)
+  refreshToken  String?
+  orders Order[]
+}
+enum Roles {
+  ADMIN
+  USER
+}
