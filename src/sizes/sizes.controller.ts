@@ -16,7 +16,9 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { Role } from 'src/enums/role.enum';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('sizes')
 @Controller('sizes')
 export class SizesController {
   constructor(private readonly sizesService: SizesService) {}

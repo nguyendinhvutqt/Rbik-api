@@ -19,7 +19,7 @@ import { OrdersModule } from './orders/orders.module';
     CloudinaryModule,
     OrdersModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  // controllers: [AppController],
+  // providers: [AppService],
 })
 export class AppModule {}

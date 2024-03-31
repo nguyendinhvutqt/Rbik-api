@@ -8,8 +8,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   const config = new DocumentBuilder()
-    .setTitle('RUBIK API')
-    .setDescription('rubik api')
+    .setTitle('RUBIK SHOP API')
+    .setDescription('rubik shop api')
     .setVersion('1.0')
     .addTag('rubik')
     .build();

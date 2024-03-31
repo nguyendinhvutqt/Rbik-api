@@ -9,131 +9,88 @@ export class BrandsService {
   constructor(private prismaService: PrismaService) {}
 
   async create(createBrandDto: CreateBrandDto) {
-    try {
-      const checkBrandExist = await this.prismaService.brand.findFirst({
-        where: {
-          name: createBrandDto.name,
-        },
-      });
-      if (checkBrandExist) {
-        throw new HttpException(
-          'Tên nhãn nhiệu đã tồn tại',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      const createBrand = await this.prismaService.brand.create({
-        data: { id: uuidv4(), name: createBrandDto.name },
-      });
-      return {
-        message: 'Tạo mới nhãn hiệu thành công',
-        status: HttpStatus.CREATED,
-        data: createBrand,
-      };
-    } catch (error) {
-      console.log(error);
+    const checkBrandExist = await this.prismaService.brand.findFirst({
+      where: {
+        name: createBrandDto.name,
+      },
+    });
+    if (checkBrandExist) {
       throw new HttpException(
-        'Có lỗi xảy ra',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        'Tên nhãn nhiệu đã tồn tại',
+        HttpStatus.BAD_REQUEST,
       );
     }
+    const createBrand = await this.prismaService.brand.create({
+      data: { id: uuidv4(), name: createBrandDto.name },
+    });
+    return {
+      message: 'Tạo mới nhãn hiệu thành công',
+      status: HttpStatus.CREATED,
+      data: createBrand,
+    };
   }
 
   async findAll() {
-    try {
-      const brands = await this.prismaService.brand.findMany();
-      return {
-        message: null,
-        status: HttpStatus.OK,
-        data: brands,
-      };
-    } catch (error) {
-      throw new HttpException(
-        'Có lỗi xảy ra',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    const brands = await this.prismaService.brand.findMany();
+    return {
+      message: null,
+      status: HttpStatus.OK,
+      data: brands,
+    };
   }
 
   async findOne(id: string) {
-    try {
-      const brand = await this.prismaService.brand.findFirst({
-        where: {
-          id: id,
-        },
-      });
-      return {
-        message: null,
-        status: HttpStatus.OK,
-        data: brand,
-      };
-    } catch (error) {
-      throw new HttpException(
-        'Có lỗi xảy ra',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    const brand = await this.prismaService.brand.findFirst({
+      where: {
+        id: id,
+      },
+    });
+    return {
+      message: null,
+      status: HttpStatus.OK,
+      data: brand,
+    };
   }
 
   async findByName(name: string) {
-    try {
-      const brand = await this.prismaService.brand.findFirst({
-        where: {
-          name: name,
-        },
-      });
-      return {
-        message: null,
-        status: HttpStatus.OK,
-        data: brand,
-      };
-    } catch (error) {
-      throw new HttpException(
-        'Có lỗi xảy ra',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    const brand = await this.prismaService.brand.findFirst({
+      where: {
+        name: name,
+      },
+    });
+    return {
+      message: null,
+      status: HttpStatus.OK,
+      data: brand,
+    };
   }
 
   async update(updateBrandDto: UpdateBrandDto) {
-    try {
-      const updateBrand = await this.prismaService.brand.update({
-        where: {
-          id: updateBrandDto.id,
-        },
-        data: {
-          name: updateBrandDto.name,
-        },
-      });
-      return {
-        message: 'Cập nhật nhãn hiệu thành công',
-        status: HttpStatus.OK,
-        data: updateBrand,
-      };
-    } catch (error) {
-      throw new HttpException(
-        'Có lỗi xảy ra',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    const updateBrand = await this.prismaService.brand.update({
+      where: {
+        id: updateBrandDto.id,
+      },
+      data: {
+        name: updateBrandDto.name,
+      },
+    });
+    return {
+      message: 'Cập nhật nhãn hiệu thành công',
+      status: HttpStatus.OK,
+      data: updateBrand,
+    };
   }
 
   async remove(id: string) {
-    try {
-      await this.prismaService.brand.delete({
-        where: {
-          id: id,
-        },
-      });
-      return {
-        message: 'Xoá nhãn hiệu thành công',
-        status: HttpStatus.OK,
-        data: null,
-      };
-    } catch (error) {
-      throw new HttpException(
-        'Có lỗi xảy ra',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    await this.prismaService.brand.delete({
+      where: {
+        id: id,
+      },
+    });
+    return {
+      message: 'Xoá nhãn hiệu thành công',
+      status: HttpStatus.OK,
+      data: null,
+    };
   }
 }

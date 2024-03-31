@@ -1,7 +1,5 @@
 import {
-  Body,
   Controller,
-  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -14,29 +12,17 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './roles.guard';
 import { Roles } from './roles.decorator';
 import { Role } from 'src/enums/role.enum';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
-
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles(Role.User)
-  // @Get()
-  // tets(@Request() req) {
-  //   return req.user;
-  // }
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @Post('sign-in')
   signIn(@Request() req) {
     return this.authService.login(req.user);
-  }
-
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.User, Role.Admin)
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
   }
 }

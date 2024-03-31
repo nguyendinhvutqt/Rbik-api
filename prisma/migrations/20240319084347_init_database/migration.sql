@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE `Brand` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(255) NOT NULL,
 
     UNIQUE INDEX `Brand_name_key`(`name`),
@@ -9,7 +9,7 @@ CREATE TABLE `Brand` (
 
 -- CreateTable
 CREATE TABLE `Size` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(255) NOT NULL,
 
     UNIQUE INDEX `Size_name_key`(`name`),
@@ -18,15 +18,16 @@ CREATE TABLE `Size` (
 
 -- CreateTable
 CREATE TABLE `Product` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(255) NOT NULL,
     `price` DOUBLE NOT NULL,
-    `image` VARCHAR(191) NOT NULL,
+    `imagePublicId` VARCHAR(191) NOT NULL,
+    `imageUrl` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NULL,
     `inventoryNumber` INTEGER NULL,
-    `quantitySold` INTEGER NULL,
-    `brandId` INTEGER NULL,
-    `sizeId` INTEGER NULL,
+    `quantitySold` INTEGER NULL DEFAULT 0,
+    `brandId` VARCHAR(191) NULL,
+    `sizeId` VARCHAR(191) NULL,
 
     UNIQUE INDEX `Product_name_key`(`name`),
     PRIMARY KEY (`id`)
@@ -34,37 +35,38 @@ CREATE TABLE `Product` (
 
 -- CreateTable
 CREATE TABLE `Order` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `totalPrice` DOUBLE NOT NULL,
-    `order_status` VARCHAR(191) NOT NULL,
-    `deliveryDate` TIMESTAMP(6) NOT NULL,
-    `isPaid` BOOLEAN NOT NULL DEFAULT false,
-    `isPaidAt` TIMESTAMP(6) NOT NULL,
-    `created_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    `updated_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    `userId` INTEGER NULL,
+    `id` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
+    `status` ENUM('PENDING', 'CONFIRMED', 'SHIPPED', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    `totalAmount` DOUBLE NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `deletedAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `OrderProduct` (
+    `id` VARCHAR(191) NOT NULL,
+    `orderId` VARCHAR(191) NOT NULL,
+    `productId` VARCHAR(191) NOT NULL,
     `quantity` INTEGER NOT NULL,
-    `productId` INTEGER NOT NULL,
-    `orderId` INTEGER NOT NULL,
+    `price` DOUBLE NOT NULL,
 
-    PRIMARY KEY (`productId`, `orderId`)
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `User` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `name` VARCHAR(255) NULL,
     `phone` VARCHAR(191) NULL,
     `address` VARCHAR(191) NULL,
     `avatar` VARCHAR(191) NULL,
+    `role` ENUM('ADMIN', 'USER') NOT NULL DEFAULT 'USER',
     `refreshToken` VARCHAR(191) NULL,
 
     UNIQUE INDEX `User_email_key`(`email`),
@@ -81,7 +83,7 @@ ALTER TABLE `Product` ADD CONSTRAINT `Product_sizeId_fkey` FOREIGN KEY (`sizeId`
 ALTER TABLE `Order` ADD CONSTRAINT `Order_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `OrderProduct` ADD CONSTRAINT `OrderProduct_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE `OrderProduct` ADD CONSTRAINT `OrderProduct_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `Order`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `OrderProduct` ADD CONSTRAINT `OrderProduct_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `Order`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE `OrderProduct` ADD CONSTRAINT `OrderProduct_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
