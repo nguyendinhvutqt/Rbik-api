@@ -1,4 +1,10 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateOrderDto } from './create-order.dto';
+import { IsNotEmpty, IsUUID } from 'class-validator';
+import { OrderStatus } from 'src/enums/order_status.enum';
 
-export class UpdateOrderDto extends PartialType(CreateOrderDto) {}
+export class UpdateOrderDto {
+  @IsUUID()
+  id: string;
+
+  @IsNotEmpty()
+  status: OrderStatus;
+}

@@ -6,11 +6,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { isValidEmail } from 'src/ultils/validateEmail';
 import { UUID } from 'crypto';
+import { ChangePasswordDto } from './dto/change-pasword.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private prismaService: PrismaService) {}
 
+  // đăng kí người dùng
   async create(createUserDto: CreateUserDto): Promise<any> {
     // kiểm tra định dạng email
     const checkIsValidEmail = isValidEmail(createUserDto.email);
@@ -53,10 +55,13 @@ export class UsersService {
     return { message: 'Tạo mới người dùng thành công' };
   }
 
-  findAll() {
-    return `This action returns all users`;
+  // lấy tất cả người dùng
+  async findAll() {
+    const users = await this.prismaService.user.findMany();
+    return { message: null, status: HttpStatus.OK, data: users };
   }
 
+  // lấy người dùng theo email
   async findOneByEmail(email: string): Promise<any> {
     return this.prismaService.user.findUnique({
       where: {
@@ -65,15 +70,92 @@ export class UsersService {
     });
   }
 
-  findOne(id: UUID) {
-    return `This action returns a #${id} user`;
+  // Lấy người dùng theo id
+  async findOne(id: UUID) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    return { message: null, status: HttpStatus.OK, data: user };
   }
 
-  update(id: UUID, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  // thay đổi mật khẩu
+  async changePassword(userId: UUID, changePasswordDto: ChangePasswordDto) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (
+      !user ||
+      !(await bcrypt.compare(changePasswordDto.password, user?.password))
+    ) {
+      throw new HttpException('Mật khẩu cũ không khớp', HttpStatus.BAD_REQUEST);
+    }
+
+    // kiểm tra mật khẩu mới và có khớp hay không
+    if (
+      changePasswordDto.newPassword !== changePasswordDto.confirmNewPassword
+    ) {
+      throw new HttpException(
+        'Mật khẩu mới không khớp',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // hash password và lưu
+    const saltOrRounds = 10;
+    const hashPassword = await bcrypt.hash(
+      changePasswordDto.newPassword,
+      saltOrRounds,
+    );
+
+    const updateUser = await this.prismaService.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: hashPassword,
+      },
+    });
+    return {
+      message: 'Thay đổi mật khẩu thành công',
+      status: HttpStatus.OK,
+      data: updateUser,
+    };
   }
 
-  remove(id: UUID) {
-    return `This action removes a #${id} user`;
+  // cập nhật người dùng
+  async update(id: UUID, updateUserDto: UpdateUserDto) {
+    const updateUser = await this.prismaService.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        name: updateUserDto.name,
+        phone: updateUserDto.phone,
+        address: updateUserDto.address,
+      },
+    });
+    return {
+      message: 'Cập nhật thông tin thành công',
+      status: HttpStatus.OK,
+      data: updateUser,
+    };
+  }
+
+  // xoá người dùng
+  async remove(id: UUID) {
+    await this.prismaService.user.delete({
+      where: {
+        id: id,
+      },
+    });
+    return {
+      message: 'Xoá người dùng thành công',
+      status: HttpStatus.OK,
+      data: null,
+    };
   }
 }

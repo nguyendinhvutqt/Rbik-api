@@ -7,6 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class OrdersService {
   constructor(private prismaService: PrismaService) {}
 
+  // tạo đơn hàng
   async create(createOrderDto: CreateOrderDto) {
     // tính tổng tiền đơn hàng
     const totalMoney = createOrderDto.products.reduce((total, product) => {
@@ -40,6 +41,7 @@ export class OrdersService {
     };
   }
 
+  // lấy tất cả đơn hàng
   async findAll() {
     const orders = await this.prismaService.order.findMany({
       select: {
@@ -65,7 +67,18 @@ export class OrdersService {
     return { message: null, status: HttpStatus.OK, data: orders };
   }
 
-  async findOne(id: string) {
+  // lấy đơn hàng theo id người dùng
+  async findByUser(userId: string) {
+    const orders = await this.prismaService.order.findMany({
+      where: {
+        userId: userId,
+      },
+    });
+    return { message: null, status: HttpStatus.OK, data: orders };
+  }
+
+  // lấy đơn hàng theo id
+  async findOneById(id: string) {
     const order = await this.prismaService.order.findMany({
       where: {
         id: id,
@@ -93,11 +106,34 @@ export class OrdersService {
     return { message: null, status: HttpStatus.OK, data: order };
   }
 
-  update(id: string, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  // cập nhật đơn hàng
+  async update(userId: string, updateOrderDto: UpdateOrderDto) {
+    const updateOrder = await this.prismaService.order.update({
+      where: {
+        id: updateOrderDto.id,
+      },
+      data: {
+        status: updateOrderDto.status,
+      },
+    });
+    return {
+      message: 'Cập nhật đơn hàng thành công',
+      status: HttpStatus.OK,
+      data: updateOrder,
+    };
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} order`;
+  // xoá đơn hàng
+  async remove(id: string) {
+    await this.prismaService.order.delete({
+      where: {
+        id: id,
+      },
+    });
+    return {
+      message: 'Xoá đơn hàng thành công',
+      status: HttpStatus.OK,
+      data: null,
+    };
   }
 }
